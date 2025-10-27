@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐜 Realistic Ant Mill Simulation</title>
+<style>
+  body {
+    background: radial-gradient(circle, #f5efe2, #d9c99d);
+    overflow: hidden;
+    text-align: center;
+    font-family: Arial, sans-serif;
+  }
+
+  h1 {
+    color: #3b2f1b;
+    margin-top: 10px;
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  #controls {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.8);
+    padding: 12px 20px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 8px #0003;
+  }
+
+  label {
+    color: #3b2f1b;
+    font-weight: bold;
+  }
+
+  input[type="range"] {
+    width: 200px;
+  }
+
+  #info {
+    margin-top: 6px;
+    color: #4a3a1b;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+<h1>🐜 Realistic Ant Mill (Death Spiral) Simulation</h1>
+
+<canvas id="trail"></canvas>
+<div id="controls">
+  <label>⚙️ Speed:</label>
+  <input type="range" id="speedControl" min="1" max="10" value="5">
+  <div id="info">चींटियाँ फेरोमोन ट्रेल को फॉलो करते हुए धीरे-धीरे मौत के घेरे में फँस जाती हैं 🌀</div>
+</div>
+
+<script>
+const canvas = document.getElementById("trail");
+const ctx = canvas.getContext("2d");
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const numAnts = 70;
+const ants = [];
+const centerX = window.innerWidth / 2;
+const centerY = window.innerHeight / 2;
+let speedMultiplier = 1;
+
+for (let i = 0; i < numAnts; i++) {
+  ants.push({
+    angle: Math.random() * 360,
+    radius: 120 + Math.random() * 180,
+    speed: 0.01 + Math.random() * 0.02,
+    life: 1.0, // fade-out for dead ants
+    color: "rgba(107,48,27,1)"
+  });
+}
+
+function animate() {
+  ctx.fillStyle = "rgba(245,239,226,0.25)"; // pheromone trail fade effect
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ants.forEach(a => {
+    a.angle += a.speed * speedMultiplier;
+    a.radius -= 0.03 * speedMultiplier;
+
+    if (a.radius < 60) {
+      a.radius = 60;
+      a.life -= 0.005 * speedMultiplier; // slowly die
+      if (a.life < 0) a.life = 0;
+    }
+
+    const x = centerX + a.radius * Math.cos(a.angle);
+    const y = centerY + a.radius * Math.sin(a.angle);
+
+    ctx.beginPath();
+    ctx.fillStyle = `rgba(107,48,27,${a.life})`;
+    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+    ctx.fill();
+  });
+
+  requestAnimationFrame(animate);
+}
+
+document.getElementById("speedControl").addEventListener("input", (e) => {
+  speedMultiplier = e.target.value / 5;
+});
+
+animate();
+</script>
+</body>
+</html>
